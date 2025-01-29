@@ -1,0 +1,19 @@
+module FA(
+	input [0]
+		a,
+		b,
+		Cin
+	output [1:0]
+		S,
+		Cout
+)
+
+	assign S = a ^ b ^ Cin;
+	
+	assign Cout = ((a ^ b) & Cin)|(a & b);
+
+
+
+
+
+endmodule

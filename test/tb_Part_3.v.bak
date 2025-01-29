@@ -1,0 +1,32 @@
+module tb_Part_3;
+
+	reg [15:0] count;
+	reg [7:0] a, b;
+	reg cin;
+	wire [7:0] sum;
+	wire overflow;
+	
+	
+	Part_3 #(8) UUT (.a(a), .b(b), .cin(cin), .sum(sum), .overflow(overflow));
+	
+	
+	assign a[7:0] = count[15:8];
+	assign b[7:0] = count[7:0];
+	
+	
+	initial begin
+		cin = 1'b0;
+	
+	
+	for (count = 0; count < 65536; count = count + 1) begin
+		#10;
+						
+							
+		if ({overflow, sum} != (count[15:8] + count[7:0])) begin
+		$display("ERROR: a=%b b=%b sum=%b overflow=%b", count[15:8], count[7:0], sum, overflow);
+							
+	
+					
+	end
+	
+endmodule
