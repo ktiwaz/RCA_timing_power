@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-module ram_64x16 (
+module ram_64x16_a (
     input clk,
     input wr_en,
     input [63:0] data_in,

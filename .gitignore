@@ -1,0 +1,28 @@
+# Ignore all quartus-generated files
+*.txt
+*.cdf
+*.done
+*.rpt
+*.smsg
+*.summary
+*.html
+*.jdi
+*.pin
+*.pof
+*.sld
+*.sof
+*.bak
+*.qdf
+*.qws
+*.json
+
+# Ignore all iverilog generated files
+*.out
+*.vcd
+*.v.bak
+
+# ignore quartus-generated directories
+**/.qsys_edit/
+**/db/
+**/incremental_db/
+**/.history/

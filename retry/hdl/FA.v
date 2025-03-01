@@ -1,12 +1,14 @@
-module FA(
-	input [0]
-		a,
-		b,
-		Cin
-	output [1:0]
-		S,
-		Cout
-)
+module FA
+(
+	input 
+		 a,
+		 b,
+		 Cin,
+	
+	output 
+		 S,
+		 Cout
+);
 
 	assign S = a ^ b ^ Cin;
 	

@@ -1,102 +1,47 @@
-
-//=======================================================
-//  Parametrized Pipelined Ripple Carry Adder
-//=======================================================
-
-// Nbits is the bus width of the adder inputs and outputs
-// Nstages is the number of pipelined stages. Must be a power of 2. The minimum is 1.
-// This does not support an overflow indication bit
-
-module rippleCarryAdder_pipeline #(parameter Nstages = 2, parameter Nbits = 8)(
-
-	input               clk,
-	input  [Nbits-1:0]  a, 
-	input  [Nbits-1:0]  b, 
-	input               cin, 
-	output [Nbits-1:0]  sum, 
-    output              cout
-	
+module rippleCarryAdder_pipeline_2 #(parameter Nbits = 16) (
+    input clk,
+    input [Nbits-1:0] a,
+    input [Nbits-1:0] b,
+    input             cin,
+    output [Nbits-1:0] sum
 );
+    parameter HALF_N = Nbits / 2;
 
-
-
-
-//=======================================================
-//  REG/WIRE declarations
-//=======================================================
-localparam slice_size = Nbits / Nstages;
+    // Internal signals
+    wire [HALF_N-1:0] sum_lower, sum_upper;
+    wire carry_out_stage1;
     
-wire    [Nbits - 1:0] a_d [Nstages : 0];
-reg     [Nbits - 1:0] a_q [Nstages : 0];
+    reg [HALF_N-1:0] sum_lower_reg;
+    reg [HALF_N-1:0] a_upper_reg, b_upper_reg;
+    reg carry_reg;
 
-wire    [Nbits - 1:0] b_d [Nstages : 0];
-reg     [Nbits - 1:0] b_q [Nstages : 0];
+    // First stage: Lower half RCA
+    rippleCarryAdder #(.Nbits(HALF_N)) rca1 (
+        .a(a[HALF_N-1:0]),
+        .b(b[HALF_N-1:0]),
+        .cin(cin),
+        .sum(sum_lower),
+        .overflow(carry_out_stage1)
+    );
 
-wire    [Nbits - 1:0] s_d [Nstages : 0];
-reg     [Nbits - 1:0] s_q [Nstages : 0];
-
-wire c_d [Nstages : 0];
-reg  c_q [Nstages : 0];
-
-
-//=======================================================
-//  Structural Code
-//=======================================================
-
-// Outputs
-assign sum = s_q[Nstages][Nbits-1:0];
-assign cout= c_q[Nstages];
-
-// Registered inputs
-assign a_d[0][Nbits-1:0] = a;
-assign b_d[0][Nbits-1:0] = b;
-assign c_d[0] = cin;
-
-//=======================================================
-//  Behavioral Code
-//=======================================================
-
-initial begin
-    if (Nbits % Nstages != 0) $fatal("Nbits must be divisible by Nstages");
-end
-
-// Stages stages of Pipelined adder
-genvar i;
-
-generate
-	for (i = 1; i <= Nstages; i = i + 1) begin : adder_pipeline
-
-    assign s_d[i] = s_q[i-1];
-
-    assign a_d[i] = a_q[i-1];
-    assign b_d[i] = b_q[i-1];
-
-    rippleCarryAdder #(
-        .Nbits(slice_size), 
-        .signd(1'b0)
-        ) u_RCA1 (
-        .a(a_q[i-1][i*slice_size-1:(i-1)*slice_size]),
-        .b(b_q[i-1][i*slice_size-1:(i-1)*slice_size]),
-        .cin(c_q[i-1]),
-        .sum(s_d[i][i*slice_size-1:(i-1)*slice_size]),
-        .overflow(c_d[i])
-        );
-
-    end	
-			
-endgenerate
-
-
-
-// Pipeline register update block
-always @(posedge clk) begin : update_regs
-    integer j;
-    for (j = 0; j <= Nstages; j = j + 1) begin
-        a_q[j] <= a_d[j];
-        b_q[j] <= b_d[j];
-        s_q[j] <= s_d[j];
-        c_q[j] <= c_d[j];
+    // Pipeline registers
+    always @(posedge clk) begin
+        sum_lower_reg <= sum_lower;
+        a_upper_reg   <= a[Nbits-1:HALF_N];
+        b_upper_reg   <= b[Nbits-1:HALF_N];
+        carry_reg     <= carry_out_stage1;
     end
-end
+
+    // Second stage: Upper half RCA
+    rippleCarryAdder #(.Nbits(HALF_N)) rca2 (
+        .a(a_upper_reg),
+        .b(b_upper_reg),
+        .cin(carry_reg),
+        .sum(sum_upper),
+        .overflow() // Carry out ignored
+    );
+
+    // Concatenating final sum
+    assign sum = {sum_upper, sum_lower_reg};
 
 endmodule

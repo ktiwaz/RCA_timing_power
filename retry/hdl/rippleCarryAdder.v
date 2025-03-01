@@ -16,7 +16,7 @@ module rippleCarryAdder #(parameter Nbits = 8, parameter signd = 0)(
 	input [Nbits-1:0] b, 
 	input cin, 
 	output [Nbits-1:0] sum, 
-	output overflow
+	output cout
 	
 	
 );
@@ -37,7 +37,7 @@ module rippleCarryAdder #(parameter Nbits = 8, parameter signd = 0)(
 	genvar i;
 
 	generate
-		for (i = 0; i < Nbits; i = i + 1) begin
+		for (i = 0; i < Nbits; i = i + 1) begin : adder
 			FA myfa (.a(a[i]), .b(b[i]), .Cin(c_carry[i]), .S(sum[i]), .Cout(c_carry[i+1]));
 		end
 		
@@ -50,11 +50,11 @@ module rippleCarryAdder #(parameter Nbits = 8, parameter signd = 0)(
 	
 		if (signd)
 		
-				assign overflow = ((~a[Nbits-1])&(~b[Nbits-1])&sum[Nbits-1])|((a[Nbits-1])&(b[Nbits-1])&(~sum[Nbits-1]));	
+				assign cout = ((~a[Nbits-1])&(~b[Nbits-1])&sum[Nbits-1])|((a[Nbits-1])&(b[Nbits-1])&(~sum[Nbits-1]));	
 				
 		else
 		
-				assign overflow = c_carry[Nbits];
+				assign cout = c_carry[Nbits];
 	
 	endgenerate
 	
