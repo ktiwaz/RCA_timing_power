@@ -1,0 +1,6 @@
+DATE = "02:57:24 March 01, 2025"
+QUARTUS_VERSION = "16.0.0"
+
+# Revisions
+
+PROJECT_REVISION = "rippleCarryAdder_timing_analysis"

@@ -66,11 +66,7 @@ genvar i;
 generate
 	for (i = 1; i <= Nstages; i = i + 1) begin : adder_pipeline
 
-	 // Assign the MSBs (above the current slice)
-    assign s_d[i][Nbits-1:i*slice_size] = s_q[i-1][Nbits-1:i*slice_size];
-
-    // Assign the LSBs (below the current slice)
-    assign s_d[i][(i-1)*slice_size-1:0] = s_q[i-1][(i-1)*slice_size-1:0];
+    assign s_d[i] = s_q[i-1];
 
     assign a_d[i] = a_q[i-1];
     assign b_d[i] = b_q[i-1];
